@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Docker Nginx</title>
+</head>
+<body>
+  <h2>Setting cookie types</h2>
+</body>
+<script type="text/javascript">
+	function createCookie(name,value,days) {
+	 if (days) {
+	  var date = new Date();
+	  //Calculate miliseconds since Unix Epoch for specified number of seconds
+	  date.setTime(date.getTime()+(days*24*60*60*1000));
+	  var expires = "; expires="+date.toGMTString();
+	 } else {
+	  var expires = "";
+	 }
+	 document.cookie = name+"="+value+expires+"; path=/";
+	}
+	// createCookie('PLAIN_COOKIE',"HMM I FIND THEM BORING",1);
+	setTimeout(function() { console.log("reloading page");location.reload(); },5000);
+</script>
+</html>
+

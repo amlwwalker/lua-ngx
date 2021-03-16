@@ -1,0 +1,38 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+      <title>Protected Content Page</title>
+      <link rel="stylesheet" href="/static/css/parameters.css">
+      </link>
+   </head>
+   <body>
+      <div class="main_page">
+         <div class="page_header floating_element">
+            <span class="floating_element">
+            This page has injected fields
+            </span>
+         </div>
+         <div class="content_section floating_element">
+            <div class="content_section_text">
+               <p>Content that for whatever reason, needs protecting
+               </p>
+            </div>
+            <div class="section_header">
+               <div id="changes"></div>
+               Forms that need protecting
+            </div>
+            <div class="content_section_text">
+               <form>
+                  <input type="text" name="firstname">
+                  <input type="text" name="lastname">
+                  <input type="submit" name="submit">
+               </form>
+            </div>
+         </div>
+      </div>
+      <div class="validator">
+      </div>
+   </body>
+   <script type="text/javascript" src="/static/js/set-cookies-from-js.js"></script>
+</html>

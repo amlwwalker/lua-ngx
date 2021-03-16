@@ -1,0 +1,1 @@
+ngx.say("lua from file [helloworld]")
