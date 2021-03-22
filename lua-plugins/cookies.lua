@@ -3,7 +3,7 @@ local PLAIN_COOKIE = ""
 function findCookie (cookieName)
   ngxCookieName = "cookie_" .. cookieName
   ngx.log(ngx.STDERR, "cookieName: " .. ngxCookieName)
-    if ngx.var[ngxCookieName] ~= nil or ngx.var[ngxCookieName] == "" then
+    if ngx.var[ngxCookieName] ~= nil and ngx.var[ngxCookieName] ~= "" then --not nil and not blank
      storage = ngx.var[ngxCookieName]
      ngx.log(ngx.STDERR, "PLAIN_COOKIE: " .. storage)
     else
