@@ -1,13 +1,51 @@
+  local http = require("resty.http")
+  local json = require "cjson"
 
--- get the body content based on the content-type
+local function fetch_via_https(server,path, body)
+    local httpc = http.new()
+    ok,err = httpc:connect(server,443)
+    if err ~= nil then
+       ngx.log(ngx.ERR,"Connection Failed " .. err)
+       return False
+    end
 
--- ngx.say("request is:",ngx.var.request_method)
--- ngx.say("the constant is:",ngx.HTTP_GET,type(ngx.HTTP_GET))
+    -- ngx.log(ngx.ERR,"Connection error " .. err)
+    -- Trigger the SSL handshake
+    session, err = httpc:ssl_handshake(False, server, false)
+    local res, err = httpc:request {
+        path = path,
+        method = 'POST',
+        body = body,
+        headers = {
+        --     ["Authorization"] = "Bearer LRdsr7icoGPa_krmgBRPu0lMK1xMPNoAYby82W_z",
+            ["Content-Type"] = "application/json",
+            ["Content-Length"] = string.len(tostring(body))
+        }
+    }
+
+    if not res then
+        ngx.log(ngx.ERR,"Request Failed")
+        httpc:close()
+        return False
+    end
+
+    -- Return the connection to the keepalive pool
+    httpc:set_keepalive()
+
+    -- Check the status, dispatcher will serve us a 302
+    if res.status == 200 then
+        body, err = res:read_body()
+        return body
+    end
+
+    return False
+end
+
 local function vesperRequest(OZ_DT,OZ_TC,OZ_S,headers)
-  local VESPER_URL = "https://vesper.p.botx.us/decision"
-
-  local https = require("ssl.https")
-  local request_body = { 
+  print(headers)
+  local VESPER_URL = "httpdump.io"
+  local httpc = http.new()
+    local request_body = { 
     client_ds = {
       client_error = false,
       et = 10,
@@ -16,33 +54,64 @@ local function vesperRequest(OZ_DT,OZ_TC,OZ_S,headers)
       ip = "127.0.0.1",
       mo = 2,
       pd = "acc",
-      pw_match = true,
+      pw_match = true,  
       ref = "https://localhost:8080",
       server_error = false,
-      timestamp = tostring(os.time()),
-      ua = headers.user_agent,
       url = "https://localhost:8080/whiteopstest.jsp",
       user_geo = "US",
       validation_error = false,
     },
-    datatoken = OZ_DT,
-    payload = OZ_SG,
-    session = OZ_TC
+    datatoken = "dfsdfsdf",
+    payload = "wrwerweZ_SG",
+    session = "w3e4w32wrwe"
   }
-  request_body = json.encode(request_body)
-  local response_body = {}
-  local body, code, headers, status = https.request {
-    url = VESPER_URL,
-    method = 'POST',
-    headers = {
-      ["Authorization"] = "Bearer LRdsr7icoGPa_krmgBRPu0lMK1xMPNoAYby82W_z",
-      ["Content-Type"] = "application/json",
-      ["Content-Length"] = string.len(request_body)
-    },
-    source = ltn12.source.string(request_body),
-    sink = ltn12.sink.table(response_body)
-  }
-  ngx.say(response_body)
+  ngx.log(ngx.ERR,"json request body " .. tostring(json.encode(request_body)))
+  fetch_via_https(VESPER_URL, "/evntb", json.encode(request_body))
+  -- local resp, err = httpc:request_uri("https://httpdump.io/evntb", {
+  --     method = "POST",
+  --     -- body = json.encode(request_body),
+  --     ssl_verify = false,
+  --     headers = {
+  --               -- ["Authorization"] = "Bearer LRdsr7icoGPa_krmgBRPu0lMK1xMPNoAYby82W_z",
+  --               ["Content-Type"] = "application/json",
+  --               ["Content-Length"] = string.len(tostring(request_body))
+  --     }
+  -- })
+   
+  -- if not resp then
+  --     ngx.say("request error :", err)
+  --     return
+  -- end
+   
+  -- --Get the status code
+  -- ngx.status = resp.status
+   
+  -- --Get the response header
+  -- for k, v in pairs(resp.headers) do
+  --     if k ~= "Transfer-Encoding" and k ~= "Connection" then
+  --         ngx.header[k] = v
+  --     end
+  -- end
+  -- --Response volume
+  -- ngx.say(resp.body)
+
+  -- local http_request = require "http.request"
+
+  -- request_body = json.encode(request_body)
+  -- local response_body = {}
+  -- local body, code, headers, status = https.request {
+  --   url = VESPER_URL,
+  --   method = 'POST',
+  --   headers = {
+  --     ["Authorization"] = "Bearer LRdsr7icoGPa_krmgBRPu0lMK1xMPNoAYby82W_z",
+  --     ["Content-Type"] = "application/json",
+  --     ["Content-Length"] = string.len(request_body)
+  --   },
+  --   source = ltn12.source.string(request_body),
+  --   sink = ltn12.sink.table(response_body)
+  -- }
+  -- ngx.say(response_body)
+  --careful of request timeout, or how long to wait for response
 end 
 
 local function processWhiteOpsTokens(OZ_DT,OZ_TC,OZ_SG, headers)
