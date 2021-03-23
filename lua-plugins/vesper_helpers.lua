@@ -1,5 +1,6 @@
 local http = require("resty.http")
 local json = require ("cjson") -- currently used to convert table to json
+
 local function fetch_via_https(server,path, body)
     local httpc = http.new()
     ok,err = httpc:connect(server,443)
@@ -66,68 +67,3 @@ local function continue(status, body, err) -- this should do anything before all
   ngx.say("welcome to the matrix")
   ngx.exit(ngx.OK)
 end
-
-local function vesperRequest(OZ_DT,OZ_TC,OZ_SG,headers)
-  for k, v in pairs(headers) do
-      ngx.log(ngx.ERR,"header " .. k .. " " .. v)
-  end
-  local httpc = http.new()
-  local mockResponse = {
-    action = "allow",
-    bot = false
-  }
-  local request_body = { 
-    client_ds = {
-      client_error = false,
-      et = 10,
-      event_success = true,
-      fi = "login",
-      ip = "127.0.0.1",
-      mo = 2,
-      pd = "acc",
-      pw_match = true,  
-      ua = headers["user_agent"],
-      ref = "https://localhost:8080",
-      server_error = false,
-      url = "https://localhost:8080/whiteopstest.jsp",
-      user_geo = "US",
-      validation_error = false,
-    },
-    datatoken = OZ_DT,
-    payload = OZ_TC,
-    session = OZ_SG,
-    __response = json.encode(mockResponse),
-    __status = "203"
-  }
-  status, body, err = fetch_via_https("httpdump.io", "/evntb", json.encode(request_body))
-  if err ~= nil then
-    ngx.log(ngx.ERR, "json request body err " .. err)
-  else
-    ngx.log(ngx.ERR,"json request body status " .. status .. " body " .. body)
-  end
-  return status, body, err
-end 
-
-
--- handle processing a body
-if ngx.var.request_method == "POST" then
-  local args = nil
-  args = ngx.req.get_post_args() --retrieve the post args from the body. Note this can be done in nginx.conf however doing it here minimises the changes for a client
-    local headers, err = ngx.req.get_headers(0)
-  local contentType = ngx.var.content_type
-  if contentType == nil then
-    abort()
-  elseif contentType == "application/x-www-form-urlencoded" then
-    handleUrlForm(args) --check required fields exist
-    -- if we get to here, they must, so lets read them out
-    local OZ_DT = args["OZ_DT"]
-    local OZ_TC = args["OZ_TC"]
-    local OZ_SG = args["OZ_SG"]
-    status, body, err = vesperRequest(OZ_DT,OZ_TC,OZ_SG, headers)
-    continue(status, body, err)
-  elseif contentType == "application/json" then
-    continue() --handle json before continue
-  end
-end
-
-
